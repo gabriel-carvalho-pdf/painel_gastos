@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Operador | Sistema Central</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #05050a; background-image: radial-gradient(circle at center, #131324 0%, #05050a 100%);
+            color: #e0e0e0; font-family: 'Rajdhani', sans-serif; min-height: 100vh; display: flex; align-items: center; padding: 40px 0;
+        }
+        
+        .futuristic-card {
+            background: rgba(10, 10, 20, 0.8); border: 1px solid #ffaa00;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.2), inset 0 0 15px rgba(255, 170, 0, 0.1);
+            backdrop-filter: blur(10px); border-radius: 8px;
+        }
+
+        h3 { color: #ffffff; letter-spacing: 3px; text-shadow: 0 0 15px #ffaa00; }
+
+        input {
+            width: 100%; padding: 10px; margin-bottom: 5px; background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 170, 0, 0.5); color: #ffaa00; border-radius: 4px; font-size: 1.1rem;
+        }
+        input:focus { outline: none; border-color: #ffaa00; box-shadow: 0 0 15px rgba(255, 170, 0, 0.5); background: rgba(0,0,0,0.8); }
+        label { color: #ffaa00; text-transform: uppercase; font-size: 0.9rem; display: block; margin-top: 15px; margin-bottom: 5px; }
+        
+        /* Estilização para as regras de senha do Django */
+        .helptext, ul { color: #888; font-size: 0.8rem; margin-bottom: 10px; padding-left: 15px; }
+        ul.errorlist { color: #ff003c; list-style-type: none; padding: 0; text-shadow: 0 0 5px #ff003c; }
+
+        .btn-neon-orange {
+            background: transparent; color: #ffaa00; border: 1px solid #ffaa00;
+            text-transform: uppercase; letter-spacing: 2px; font-weight: 700; padding: 10px; transition: 0.3s;
+        }
+        .btn-neon-orange:hover { background: #ffaa00; color: #000; box-shadow: 0 0 20px #ffaa00; }
+        
+        .link-voltar { color: #00f0ff; text-decoration: none; font-size: 0.9rem; text-transform: uppercase; transition: 0.3s;}
+        .link-voltar:hover { color: #fff; text-shadow: 0 0 10px #00f0ff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card futuristic-card p-4">
+                    <h3 class="text-center mb-4 fw-bold">NOVO OPERADOR</h3>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-neon-orange w-100 mt-4">REGISTAR ACESSO</button>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'login' %}" class="link-voltar">< Voltar para o Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

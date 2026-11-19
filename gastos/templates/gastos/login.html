@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Restrito | Sistema Central</title>
+    
+    <!-- Bootstrap 5 e Fonte Rajdhani -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #05050a;
+            background-image: radial-gradient(circle at center, #131324 0%, #05050a 100%);
+            color: #e0e0e0;
+            font-family: 'Rajdhani', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .futuristic-card {
+            background: rgba(10, 10, 20, 0.8);
+            border: 1px solid #00f0ff;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+        }
+
+        h3 {
+            color: #ffffff;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px #00f0ff;
+        }
+
+        /* Estilização nativa dos campos de formulário do Django */
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            color: #00f0ff;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #00f0ff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        label {
+            color: #00f0ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .btn-neon {
+            background: transparent;
+            color: #00f0ff;
+            border: 1px solid #00f0ff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-neon:hover {
+            background: #00f0ff;
+            color: #000000;
+            box-shadow: 0 0 20px #00f0ff;
+        }
+
+        .btn-neon-orange {
+    background: transparent;
+    color: #ffaa00;
+    border: 1px solid #ffaa00;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+    padding: 10px;
+    text-decoration: none; /* Remove o sublinhado do link */
+    display: block;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.btn-neon-orange:hover {
+    background: #ffaa00;
+    color: #000000;
+    box-shadow: 0 0 20px #ffaa00;
+}
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div class="card futuristic-card p-4">
+                    <h3 class="text-center mb-4 fw-bold">AUTENTICAÇÃO</h3>
+                    
+                    <form method="POST">
+                        <!-- Token de segurança obrigatório no Django -->
+                        {% csrf_token %}
+                        
+                        <!-- O Django injeta os campos de utilizador e password aqui -->
+                        
+<!-- Campo do Utilizador gerado pelo Django -->
+<div class="mb-3">
+    <label class="form-label text-light">Utilizador</label>
+    {{ form.username }}
+</div>
+
+<!-- O nosso novo campo de Password simétrico e sutil -->
+<div class="mb-3">
+    <label class="form-label text-light text-uppercase" style="font-weight: 600; font-size: 0.9rem; letter-spacing: 1px;">Senha</label>
+    <div style="position: relative;">
+        
+        <!-- O input herda o seu CSS original. O padding-right cria espaço para o olho não sobrepor o texto -->
+        <input type="password" name="password" id="campo_senha" placeholder="Digite a sua senha..." required style="margin-bottom: 0; padding-right: 45px; width: 100%;">
+        
+        <!-- O olho flutuante à direita -->
+      <!-- O olho flutuante com Ícones Profissionais (SVG) -->
+        <span id="btn_olho" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.5; color: #ccc; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">
+            
+            <!-- SVG: Olho Aberto (Mostrado por defeito) -->
+            <svg id="icone_olho_aberto" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+              <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+            </svg>
+            
+            <!-- SVG: Olho Riscado (Escondido por defeito) -->
+            <svg id="icone_olho_fechado" style="display: none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755l-.809-.805zm-4.708-3.05-.726-.726C8.257 7.42 8.136 7.4 8 7.4a2.5 2.5 0 0 0 2.6 2.6c.02-.136.04-.257.04-.374zm2.146 2.146a2.5 2.5 0 0 0-2.822-2.822l2.822 2.822zm-3.528-3.528A2.5 2.5 0 0 0 4.6 9.6l3.14-3.14zM8 11.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8c.058-.087.122-.183.195-.288.335-.48.83-1.12 1.465-1.755l.809.805A8.473 8.473 0 0 0 2.641 8C4.26 9.58 6.09 11 8 11c.53 0 1.04-.08 1.52-.224l.79.79A7.028 7.028 0 0 1 8 11.5z"/><path d="m10.79 12.205-1.41-1.41a3.5 3.5 0 0 1-4.474-4.474l-1.41-1.41A4.981 4.981 0 0 0 3 8c0 2.5 2 5 5 5a4.981 4.981 0 0 0 2.79-.865l1.41 1.41 1.061-1.061-9.9-9.9-1.06 1.06 9.9 9.9 1.061-1.061z"/>
+            </svg>
+            
+        </span>
+        
+    </div>
+</div>
+                        
+                        <button type="submit" class="btn btn-neon w-100 mt-3">INICIAR SESSÃO</button>
+                        <a href="{% url 'registrar' %}" class="btn-neon-orange w-100 mt-3">CRIAR NOVA CONTA</a>
+                
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const btnOlho = document.getElementById('btn_olho');
+        const campoSenha = document.getElementById('campo_senha');
+        const iconeAberto = document.getElementById('icone_olho_aberto');
+        const iconeFechado = document.getElementById('icone_olho_fechado');
+
+        if (btnOlho && campoSenha) {
+            btnOlho.addEventListener('click', function() {
+                if (campoSenha.type === 'password') {
+                    // Revela a senha e mostra o olho riscado
+                    campoSenha.type = 'text';
+                    iconeAberto.style.display = 'block';
+                    iconeFechado.style.display = 'none';
+                } else {
+                    // Esconde a senha e mostra o olho normal
+                    campoSenha.type = 'password';
+                    iconeAberto.style.display = 'none';
+                    iconeFechado.style.display = 'block';
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Central | Dashboard Financeiro</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        .btn[href*="exportar"]:hover { background: #00ff88 !important; color: #000 !important; box-shadow: 0 0 15px #00ff88; }
+        
+        body {
+            background-color: #05050a;
+            background-image: radial-gradient(circle at top, #131324 0%, #05050a 100%);
+            color: #e0e0e0;
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+        }
+        h2 { color: #ffffff; text-transform: uppercase; letter-spacing: 3px; }
+        
+        .futuristic-card {
+            background: rgba(10, 10, 20, 0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .card-gastos { border: 1px solid #00f0ff; box-shadow: 0 0 15px rgba(0, 240, 255, 0.15); }
+        .text-neon-ciano { color: #00f0ff; text-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+        .btn-ciano { background: transparent; border: 1px solid #00f0ff; color: #00f0ff; text-transform: uppercase; font-weight: 700; transition: 0.3s; }
+        .btn-ciano:hover { background: #00f0ff; color: #000; box-shadow: 0 0 15px #00f0ff; }
+        .valor-gasto { color: #39ff14; font-weight: 700; text-shadow: 0 0 8px rgba(57, 255, 20, 0.4); }
+
+        .card-invest { border: 1px solid #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.15); }
+        .text-neon-magenta { color: #ff00ff; text-shadow: 0 0 10px rgba(255, 0, 255, 0.5); }
+        .btn-magenta { background: transparent; border: 1px solid #ff00ff; color: #ff00ff; text-transform: uppercase; font-weight: 700; transition: 0.3s; }
+        .btn-magenta:hover { background: #ff00ff; color: #000; box-shadow: 0 0 15px #ff00ff; }
+        .valor-invest { color: #bf00ff; font-weight: 700; text-shadow: 0 0 8px rgba(191, 0, 255, 0.4); }
+
+        .btn-apagar { background: transparent; border: 1px solid #ff003c; color: #ff003c; padding: 2px 8px; font-size: 0.8rem; text-decoration: none; text-transform: uppercase; transition: 0.3s; }
+        .btn-apagar:hover { background: #ff003c; color: #fff; box-shadow: 0 0 10px #ff003c; }
+
+        input, select { width: 100%; padding: 8px; margin-bottom: 15px; background: rgba(0, 0, 0, 0.6); border: 1px solid #444; color: #fff; border-radius: 4px; }
+        input:focus { outline: none; border-color: #fff; background: rgba(0,0,0,0.8); }
+        label { text-transform: uppercase; font-size: 0.85rem; color: #aaa; margin-bottom: 4px; }
+        
+        .table { color: #d1d1e0; font-size: 1.05rem; }
+        .table td { border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent !important; vertical-align: middle; }
+        .table-hover tbody tr:hover td { background-color: rgba(255, 255, 255, 0.05) !important; color: #fff; }
+
+        .btn-editar { background: transparent; border: 1px solid #ffaa00; color: #ffaa00; padding: 2px 8px; font-size: 0.8rem; text-decoration: none; text-transform: uppercase; transition: 0.3s; margin-right: 5px; }
+        .btn-editar:hover { background: #ffaa00; color: #000; box-shadow: 0 0 10px #ffaa00; }
+        
+        .progress-neon { background: rgba(0, 0, 0, 0.6); border: 1px solid #444; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 20px;}
+        .bar-safe { background: #00f0ff; box-shadow: 0 0 10px #00f0ff; transition: width 0.8s ease; }
+        .bar-danger { background: #ff003c; box-shadow: 0 0 15px #ff003c; transition: width 0.8s ease; animation: piscar 1s infinite alternate; }
+        @keyframes piscar { from { opacity: 1; } to { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-4 pb-5">
+        
+       <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold m-0" style="text-shadow: 0 0 15px #fff;">Dashboard Central</h2>
+    
+    <!-- Bloco da direita: Saudação em cima, Botões em baixo -->
+    <div class="text-end">
+        <!-- Saudação Sutil -->
+        <div class="mb-2" style="color: #ccc; font-size: 0.9rem;">
+            Olá, <span style="color: #ffaa00; font-weight: bold;">
+                {% if request.user.perfil.nome_exibicao %}
+                    {{ request.user.perfil.nome_exibicao }}
+                {% else %}
+                    {{ request.user.username }}
+                {% endif %}
+            </span>
+        </div>
+        
+        <!-- O seu formulário original intacto -->
+        <form action="{% url 'logout' %}" method="POST" class="m-0">
+            {% csrf_token %}
+            <a href="{% url 'perfil' %}" class="btn btn-outline-info me-2">Meu Perfil</a>
+            <button type="submit" class="btn-ciano" style="border-color: #ff003c; color: #ff003c; padding: 6px 15px;">Encerrar Sessão</button>
+        </form>
+    </div>
+</div>
+   <!-- Barra de Pesquisa Ciberpunk (Simetria Blindada) -->
+<div class="row mb-4 mt-3">
+    <div class="col-md-8 mx-auto">
+        <form method="GET" action="{% url 'home' %}">
+            <div class="input-group" style="height: 42px; box-shadow: 0 0 10px rgba(0, 240, 255, 0.1); border-radius: 5px;">
+                
+                <!-- Input forçado a 42px -->
+                <input type="text" name="pesquisa" class="form-control shadow-none" placeholder="Pesquisar por nome da despesa ou investimento..." value="{{ request.GET.pesquisa }}" style="height: 42px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #00f0ff; border-right: none;">
+                
+                <!-- Botão Pesquisar forçado a 42px e centrado -->
+                <button type="submit" class="btn shadow-none" style="height: 42px; background: rgba(0, 240, 255, 0.15); color: #00f0ff; border: 1px solid #00f0ff; display: flex; align-items: center; justify-content: center; padding: 0 20px;">
+                    Pesquisar
+                </button>
+                
+                <!-- Botão Limpar forçado a 42px e centrado -->
+                {% if request.GET.pesquisa %}
+                <a href="{% url 'home' %}" class="btn shadow-none" style="height: 42px; background: rgba(0,0,0,0.8); color: #ccc; border: 1px solid #555; display: flex; align-items: center; justify-content: center; padding: 0 20px;">
+                    Limpar
+                </a>
+                {% endif %}
+                
+            </div>
+        </form>
+    </div>
+</div>
+        <!-- Barra de Filtro Temporal -->
+        <div class="card futuristic-card p-3 mb-4" style="border-color: rgba(255,255,255,0.2);">
+            <form method="GET" class="row g-3 align-items-center m-0">
+                <div class="col-auto">
+                    <span class="text-uppercase fw-bold" style="color: #aaa; letter-spacing: 1px;">Período Analisado:</span>
+                </div>
+                <div class="col-auto">
+                    <select name="mes" class="form-select form-select-sm" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #555; width: 140px;">
+                        <option value="1" {% if mes_atual == 1 %}selected{% endif %}>Janeiro</option>
+                        <option value="2" {% if mes_atual == 2 %}selected{% endif %}>Fevereiro</option>
+                        <option value="3" {% if mes_atual == 3 %}selected{% endif %}>Março</option>
+                        <option value="4" {% if mes_atual == 4 %}selected{% endif %}>Abril</option>
+                        <option value="5" {% if mes_atual == 5 %}selected{% endif %}>Maio</option>
+                        <option value="6" {% if mes_atual == 6 %}selected{% endif %}>Junho</option>
+                        <option value="7" {% if mes_atual == 7 %}selected{% endif %}>Julho</option>
+                        <option value="8" {% if mes_atual == 8 %}selected{% endif %}>Agosto</option>
+                        <option value="9" {% if mes_atual == 9 %}selected{% endif %}>Setembro</option>
+                        <option value="10" {% if mes_atual == 10 %}selected{% endif %}>Outubro</option>
+                        <option value="11" {% if mes_atual == 11 %}selected{% endif %}>Novembro</option>
+                        <option value="12" {% if mes_atual == 12 %}selected{% endif %}>Dezembro</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <select name="ano" class="form-select form-select-sm" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #555; width: 90px;">
+                        <option value="2025" {% if ano_atual == 2025 %}selected{% endif %}>2025</option>
+                        <option value="2026" {% if ano_atual == 2026 %}selected{% endif %}>2026</option>
+                        <option value="2027" {% if ano_atual == 2027 %}selected{% endif %}>2027</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-sm btn-outline-light" style="letter-spacing: 1px;">FILTRAR</button>
+                </div>
+                <!-- BOTÃO DE EXPORTAR -->
+                <div class="col-auto ms-auto">
+                    <a href="{% url 'exportar_csv' %}?mes={{ mes_atual }}&ano={{ ano_atual }}" class="btn btn-sm" style="background: transparent; color: #00ff88; border: 1px solid #00ff88; letter-spacing: 1px; font-weight: bold; transition: 0.3s;">
+                        ⬇️ EXPORTAR EXCEL
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Painel de Totais -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card futuristic-card card-gastos text-center p-3">
+                    <h5 class="text-neon-ciano text-uppercase">Total de Despesas</h5>
+                    <h3 class="valor-gasto m-0">R$ {{ total_despesas|floatformat:2 }}</h3>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card futuristic-card card-invest text-center p-3">
+                    <h5 class="text-neon-magenta text-uppercase">Total Investido</h5>
+                    <h3 class="valor-invest m-0">R$ {{ total_investimentos|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- ... os dois cartões de totais terminam aqui ... -->
+        </div>
+
+        <!-- PAINEL DO GRÁFICO (adicione este bloco) -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card futuristic-card p-3 d-flex flex-column align-items-center" style="border-color: rgba(255,255,255,0.1);">
+                    <h5 class="text-uppercase fw-bold mb-3" style="color: #aaa; letter-spacing: 2px;">| Balanço Financeiro</h5>
+                    <div style="position: relative; height: 250px; width: 250px;">
+                        <canvas id="graficoBalanço"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- COLUNA ESQUERDA: GASTOS (continua aqui) ... -->
+
+            
+        <!-- BARRA DE ORÇAMENTO (OCUPANDO A LARGURA TOTAL) -->
+        <div class="mb-4">
+            <div class="d-flex justify-content-between mb-1" style="font-size: 0.9rem; text-transform: uppercase;">
+                <span style="color: #00f0ff; letter-spacing: 1px; font-weight: bold;">
+                    | Orçamento de Despesas (R$ {{ limite_orcamento|floatformat:2 }})
+                    <a href="{% url 'definir_orcamento' %}" class="btn-editar ms-2" style="font-size: 0.7rem; padding: 1px 5px;">Alterar</a>
+                </span>
+                <span class="{% if alerta_orcamento %}text-danger fw-bold{% else %}text-white{% endif %}">{{ percentual_gasto|floatformat:0 }}% Utilizado</span>
+            </div>
+            <div class="progress progress-neon">
+                <div class="progress-bar {% if alerta_orcamento %}bar-danger{% else %}bar-safe{% endif %}" role="progressbar" style="width: {{ percentual_gasto|floatformat:0 }}%;"></div>
+            </div>
+        </div>
+
+<!-- GRÁFICOS DE DETALHAMENTO (BARRAS HORIZONTAIS) -->
+        <div class="row mb-4">
+            <!-- Gráfico de Despesas -->
+            <div class="col-md-6 mb-3 mb-md-0">
+                <div class="card futuristic-card p-3">
+                    <h6 class="text-neon-ciano text-uppercase fw-bold mb-3 text-center">Detalhamento de Despesas</h6>
+                    <canvas id="barChartDespesas" height="150"></canvas>
+                </div>
+            </div>
+            <!-- Gráfico de Investimentos -->
+            <div class="col-md-6">
+                <div class="card futuristic-card p-3">
+                    <h6 class="text-neon-magenta text-uppercase fw-bold mb-3 text-center">Detalhamento de Investimentos</h6>
+                    <canvas id="barChartInvestimentos" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- COLUNA ESQUERDA: GASTOS -->
+            <div class="col-md-6">
+                <h4 class="text-neon-ciano fw-bold mb-3">| Despesas</h4>
+                
+                
+                <div class="card futuristic-card card-gastos p-3">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form_despesa.as_p }}
+                        <button type="submit" name="btn_despesa" class="btn-ciano w-100 py-2 mt-2">Registar Despesa</button>
+                    </form>
+                </div>
+                <div class="card futuristic-card card-gastos p-3">
+                <div class="table-responsive">   
+                    <table class="table table-dark table-hover m-0" style="background-color: transparent;">
+                        <thead>
+                            <tr style="color: #00f0ff;">
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in despesas %}
+                            <tr>
+                                <td>{{ item.descricao }}</td>
+                                <td class="valor-gasto">R$ {{ item.valor }}</td>
+                                <td>{{ item.data|date:"d/m/Y" }}</td>
+                                <td>
+                                    <a href="{% url 'editar_despesa' item.id %}" class="btn-editar">Editar</a>
+                                    <!-- Botão que abre o Modal -->
+                                    <a href="#" class="btn-apagar" data-bs-toggle="modal" data-bs-target="#modalApagarDespesa{{ item.id }}">Apagar</a>
+
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center py-3 text-muted">Sem despesas registadas.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                   </div>
+                   <div class="d-flex justify-content-center mt-4 mb-5">
+                   <nav aria-label="Navegação da tabela">
+                   <ul class="pagination" style="background: rgba(10, 10, 20, 0.8); border-radius: 8px; border: 1px solid #ffaa00; padding: 5px; box-shadow: 0 0 15px rgba(255, 170, 0, 0.1);">
+            
+                   {% if despesas.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link shadow-none" href="?page={{ despesas.previous_page_number }}" style="background: transparent; color: #ffaa00; border: none; text-transform: uppercase; font-weight: bold; outline: none;">
+                        &laquo; Anterior
+                    </a>
+                </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link" style="background: transparent; color: #fff; border: none;">
+                    Página {{ despesas.number }} de {{ despesas.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if despesas.has_next %}
+                <li class="page-item">
+                    <a class="page-link shadow-none" href="?page={{ despesas.next_page_number }}" style="background: transparent; color: #ffaa00; border: none; text-transform: uppercase; font-weight: bold; outline: none;">
+                        Próxima &raquo;
+                    </a>
+                </li>
+            {% endif %}
+
+          </ul>
+            </nav>
+                </div>
+
+                </div>
+            </div>
+      
+            <!-- COLUNA DIREITA: INVESTIMENTOS -->
+            <div class="col-md-6">
+                <h4 class="text-neon-magenta fw-bold mb-3">| Investimentos</h4>
+                <div class="card futuristic-card card-invest p-3">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form_investimento.as_p }}
+                        <button type="submit" name="btn_investimento" class="btn-magenta w-100 py-2 mt-2">Registar Investimento</button>
+                    </form>
+                </div>
+                <div class="card futuristic-card card-invest p-3">
+                <div class="table-responsive">   
+                    <table class="table table-dark table-hover m-0" style="background-color: transparent;">
+                        <thead>
+                            <tr style="color: #ff00ff;">
+                                <th>Ativo</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in investimentos %}
+                            <tr>
+                                <td>{{ item.descricao }}</td>
+                                <td class="valor-invest">R$ {{ item.valor }}</td>
+                                <td>{{ item.data|date:"d/m/Y" }}</td>
+                                <td>
+                                    <a href="{% url 'editar_investimento' item.id %}" class="btn-editar">Editar</a>
+                                    <!-- Botão que abre o Modal -->
+                                    <a href="#" class="btn-apagar" data-bs-toggle="modal" data-bs-target="#modalApagarInvest{{ item.id }}">Apagar</a>
+
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center py-3 text-muted">Sem investimentos registados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- ========================================== -->
+                <!-- PAGINAÇÃO DOS INVESTIMENTOS (MAGENTA)      -->
+                <!-- ========================================== -->
+              <div class="d-flex justify-content-center mt-4 mb-5">
+           <nav aria-label="Navegação da tabela de investimentos">
+              <ul class="pagination" style="background: rgba(20, 10, 20, 0.8); border-radius: 8px; border: 1px solid #ff00ff; padding: 5px; box-shadow: 0 0 15px rgba(255, 0, 255, 0.1);">
+            
+            {% if investimentos.has_previous %}
+                <li class="page-item">
+                    <a class="page-link shadow-none" href="?page_inv={{ investimentos.previous_page_number }}" style="background: transparent; color: #ff00ff; border: none; text-transform: uppercase; font-weight: bold; outline: none;">
+                        &laquo; Anterior
+                    </a>
+                </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link" style="background: transparent; color: #fff; border: none;">
+                    Página {{ investimentos.number }} de {{ investimentos.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if investimentos.has_next %}
+                <li class="page-item">
+                    <a class="page-link shadow-none" href="?page_inv={{ investimentos.next_page_number }}" style="background: transparent; color: #ff00ff; border: none; text-transform: uppercase; font-weight: bold; outline: none;">
+                        Próxima &raquo;
+                    </a>
+                </li>
+            {% endif %}
+            
+           </ul>
+         </nav>
+      </div>
+            </div>
+        </div>
+     </div>
+<!-- Script do Gráfico Futurista -->
+    <script>
+        const ctx = document.getElementById('graficoBalanço').getContext('2d');
+        
+        // Vai buscar os totais do Django, substituindo vírgulas por pontos se necessário
+        const totalDespesas = parseFloat("{{ total_despesas|default:'0'|stringformat:'f' }}".replace(',', '.'));
+        const totalInvestimentos = parseFloat("{{ total_investimentos|default:'0'|stringformat:'f' }}".replace(',', '.'));
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Despesas', 'Investimentos'],
+                datasets: [{
+                    data: [totalDespesas, totalInvestimentos],
+                    backgroundColor: [
+                        'rgba(0, 240, 255, 0.15)', // Ciano escuro transparente
+                        'rgba(255, 0, 255, 0.15)'  // Magenta escuro transparente
+                    ],
+                    borderColor: [
+                        '#00f0ff', // Néon Ciano
+                        '#ff00ff'  // Néon Magenta
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%', // Deixa o anel mais fino, estilo interface sci-fi
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#e0e0e0',
+                            font: { family: "'Rajdhani', sans-serif", size: 14, weight: 'bold' },
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+<!-- ================= MODAIS DE SEGURANÇA (GERADOS NO FUNDO DA PÁGINA) ================= -->
+
+<!-- Modais para Despesas -->
+{% for item in despesas %}
+<div class="modal fade" id="modalApagarDespesa{{ item.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content futuristic-card" style="background-color: #0b0f19; border: 1px solid #00f0ff; box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(0, 240, 255, 0.3);">
+                <h5 class="modal-title text-neon-ciano fw-bold">Aviso de Segurança</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body text-light text-start">
+                Tem a certeza que deseja eliminar a despesa <strong>"{{ item.descricao }}"</strong> no valor de <strong class="text-danger">R$ {{ item.valor }}</strong>?
+                <br><br>
+                <small class="text-muted">Esta ação não pode ser desfeita.</small>
+            </div>
+            <div class="modal-footer" style="border-top: none;">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                <a href="{% url 'deletar_despesa' item.id %}" class="btn btn-danger" style="box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);">Sim, Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Modais para Investimentos -->
+{% for item in investimentos %}
+<div class="modal fade" id="modalApagarInvest{{ item.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content futuristic-card" style="background-color: #0b0f19; border: 1px solid #ff00ff; box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 0, 255, 0.3);">
+                <h5 class="modal-title text-neon-magenta fw-bold">Aviso de Segurança</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body text-light text-start">
+                Tem a certeza que deseja eliminar o investimento em <strong>"{{ item.descricao }}"</strong> no valor de <strong class="text-danger">R$ {{ item.valor }}</strong>?
+                <br><br>
+                <small class="text-muted">Esta ação não pode ser desfeita.</small>
+            </div>
+            <div class="modal-footer" style="border-top: none;">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                <a href="{% url 'deletar_investimento' item.id %}" class="btn btn-danger" style="box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);">Sim, Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<!-- ==================================================================================== -->
+
+    <script>
+    // --- GRÁFICOS DE BARRAS (DETALHAMENTO) ---
+    // Ler os dados do Python de forma segura
+    const labelsDespesas = {{ labels_despesas|safe }};
+    const valoresDespesas = {{ valores_despesas|safe }};
+    const labelsInvest = {{ labels_invest|safe }};
+    const valoresInvest = {{ valores_invest|safe }};
+
+    // Configuração base comum para não repetir código
+    const chartOptions = {
+        responsive: true,
+        indexAxis: 'y', // Isto transforma as barras verticais em horizontais!
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { color: '#ccc' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#fff' }, grid: { display: false } }
+        }
+    };
+
+    // Renderizar Gráfico de Despesas
+    if (labelsDespesas.length > 0) {
+        new Chart(document.getElementById('barChartDespesas').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: labelsDespesas,
+                datasets: [{
+                    data: valoresDespesas,
+                    backgroundColor: 'rgba(0, 240, 255, 0.3)',
+                    borderColor: '#00f0ff',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: chartOptions
+        });
+    }
+
+    // Renderizar Gráfico de Investimentos
+    if (labelsInvest.length > 0) {
+        new Chart(document.getElementById('barChartInvestimentos').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: labelsInvest,
+                datasets: [{
+                    data: valoresInvest,
+                    backgroundColor: 'rgba(255, 0, 255, 0.3)',
+                    borderColor: '#ff00ff',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: chartOptions
+        });
+    }
+</script>
+
+<!-- Motor JavaScript do Bootstrap 5 (Necessário para Modais funcionarem) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- ESTILO DO BOTÃO FLUTUANTE REDONDO -->
+<style>
+    .btn-feedback-flutuante {
+        position: fixed !important;
+        bottom: 25px !important;
+        right: 25px !important;
+        width: 52px !important;
+        height: 52px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        z-index: 1050;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: rgba(13, 13, 26, 0.85) !important;
+        color: #ffaa00 !important;
+        border: 1px solid rgba(255, 170, 0, 0.45) !important;
+        font-size: 1.3rem !important;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 8px rgba(255, 170, 0, 0.12);
+    }
+
+    .btn-feedback-flutuante:hover {
+        border-color: #ffaa00 !important;
+        background: rgba(255, 170, 0, 0.15) !important;
+        box-shadow: 0 0 18px rgba(255, 170, 0, 0.75), inset 0 0 8px rgba(255, 170, 0, 0.35);
+        transform: scale(1.08);
+    }
+</style>
+
+<!-- BOTÃO FLUTUANTE DE FEEDBACK -->
+<button type="button" class="btn-feedback-flutuante" data-bs-toggle="modal" data-bs-target="#modalFeedback" title="Enviar Feedback">
+    💬
+</button>
+
+<!-- MODAL DE FEEDBACK -->
+<div class="modal fade" id="modalFeedback" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: #0d0d1a; border: 1px solid #ffaa00; box-shadow: 0 0 25px rgba(255, 170, 0, 0.2);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 170, 0, 0.2);">
+                <h5 class="modal-title fw-bold" style="color: #ffaa00; text-transform: uppercase;">Enviar Feedback</h5>
+                <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form method="POST" action="{% url 'enviar_feedback' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label class="form-label" style="color: #ccc; font-size: 0.9rem;">
+                        Encontrou algum erro ou tem uma sugestão de melhoria para o painel?
+                    </label>
+                    <textarea name="mensagem" rows="4" required class="form-control shadow-none"
+                              placeholder="Escreva aqui o seu comentário..."
+                              style="background: rgba(0, 0, 0, 0.6); color: #fff; border: 1px solid #ffaa00;"></textarea>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid rgba(255, 170, 0, 0.2);">
+                    <button type="button" class="btn btn-sm shadow-none" data-bs-dismiss="modal" style="color: #aaa;">Cancelar</button>
+                    <button type="submit" class="btn btn-sm fw-bold shadow-none"
+                            style="background: #ffaa00; color: #000; text-transform: uppercase; padding: 6px 18px;">
+                        Enviar Comentário
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
